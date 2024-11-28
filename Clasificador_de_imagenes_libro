@@ -1,0 +1,52 @@
+# Importación de bibliotecas
+import pandas as pd  # Biblioteca para manipulación y análisis de datos
+from keras.models import Sequential  # Clase para definir modelos secuenciales
+from keras.layers import Dense  # Capa totalmente conectada
+
+# **1. Carga de datos de entrenamiento**
+# Se carga el archivo "train.csv" que debe contener los datos de entrenamiento
+# Este archivo debe tener una columna 'label' para las etiquetas y otras 784 columnas para los datos de las imágenes.
+input_data = pd.read_csv("train.csv")  # Carga de datos de entrenamiento
+
+# **2. Preparación de los datos**
+# Se separan las etiquetas (y) de los datos de entrada (X)
+y = input_data['label']  # Las etiquetas están en la columna 'label'
+input_data.drop('label', axis=1, inplace=True)  # Se elimina la columna 'label' de los datos de entrada
+X = input_data  # Los datos de entrada son las demás columnas
+y = pd.get_dummies(y)  # Codificación one-hot de las etiquetas
+
+# **3. Definición del modelo**
+# Creación de un modelo secuencial
+classifier = Sequential()  
+
+# Primera capa oculta con 600 neuronas y función de activación ReLU
+classifier.add(Dense(units=600, kernel_initializer='uniform', activation='relu', input_dim=784))
+
+# Segunda capa oculta con 400 neuronas y función de activación ReLU
+classifier.add(Dense(units=400, kernel_initializer='uniform', activation='relu'))
+
+# Tercera capa oculta con 200 neuronas y función de activación ReLU
+classifier.add(Dense(units=200, kernel_initializer='uniform', activation='relu'))
+
+# Capa de salida con 10 neuronas (una para cada clase) y función de activación sigmoide
+classifier.add(Dense(units=10, kernel_initializer='uniform', activation='sigmoid'))
+
+# **4. Compilación del modelo**
+# Se utiliza el optimizador SGD (descenso por gradiente estocástico)
+# La función de pérdida es el error cuadrático medio (mean_squared_error)
+# Métrica: Precisión (accuracy)
+classifier.compile(optimizer='sgd', loss='mean_squared_error', metrics=['accuracy'])
+
+# **5. Entrenamiento del modelo**
+# El modelo se entrena con los datos de entrada X y las etiquetas y
+# Se usan lotes de tamaño 10 y se entrena durante 10 épocas
+classifier.fit(X, y, batch_size=10, epochs=10)
+
+# **6. Carga de datos de prueba**
+# Se cargan los datos de prueba desde el archivo "test.csv"
+# Este archivo debe contener los mismos 784 datos de entrada por fila que el archivo de entrenamiento
+test_data = pd.read_csv("test.csv")  
+
+# **7. Predicción con el modelo**
+# Se generan predicciones para los datos de prueba
+y_pred = classifier.predict(test_data)
